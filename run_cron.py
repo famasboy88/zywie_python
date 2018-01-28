@@ -10,9 +10,9 @@ from apscheduler.schedulers.twisted import TwistedScheduler
 
 process = CrawlerProcess(get_project_settings())
 sched = TwistedScheduler()
-sched.add_job(process.crawl, 'cron', args=[PinoyRecipeSpider], minute="*", second="59")
-sched.add_job(process.crawl, 'cron', args=[AllrecipeSpider], minute="*", second="59")
-sched.add_job(process.crawl, 'cron', args=[EatingwellSpider], minute="*", second="59")
-sched.add_job(process.crawl, 'cron', args=[UsdaSpider], minute="*", second="59")
+sched.add_job(process.crawl, 'cron', args=[PinoyRecipeSpider], day="1", hour="0", minute="0", second="0")
+sched.add_job(process.crawl, 'cron', args=[AllrecipeSpider], day="1", hour="0", minute="0", second="0")
+sched.add_job(process.crawl, 'cron', args=[EatingwellSpider], day="1", hour="0", minute="0", second="0")
+sched.add_job(process.crawl, 'cron', args=[UsdaSpider], day="1", hour="0", minute="0", second="0")
 sched.start()
 process.start(False)
