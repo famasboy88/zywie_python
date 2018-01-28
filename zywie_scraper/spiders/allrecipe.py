@@ -11,7 +11,7 @@ class AllrecipeSpider(scrapy.Spider):
     start_urls = ['http://allrecipes.com/recipes/84/healthy-recipes']
 
     def parse(self, response):
-        for x in range(1, 216):
+        for x in range(1, 200):
             link = "http://allrecipes.com/recipes/84/healthy-recipes/?page=" + str(x)
             link = response.urljoin(link)
             yield scrapy.Request(link, callback=self.getFoodLink)

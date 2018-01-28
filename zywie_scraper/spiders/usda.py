@@ -11,6 +11,7 @@ class UsdaSpider(scrapy.Spider):
     start_urls = ['https://api.nal.usda.gov/ndb/search/?format=xml&offset=0&sort=r&q=carrot&ds=Standard%20Reference&fg=Vegetables%20and%20Vegetable%20Products&api_key=fCaQFZDctF3YHA85VzFd4eHphM9GukBUWFJh2Uld']
 
     rootDB = db.reference()
+    food_list = db.reference().child("food_title").get()
 
     def parse(self, response):
         rootDB = db.reference()
@@ -40,11 +41,10 @@ class UsdaSpider(scrapy.Spider):
 
     def getDetail(self, response):
         cnt = 0
-        food_list = db.reference().child("food_title").get()
-        for food_key, food_details in food_list.items():
+        for food_key, food_details in self.food_list.items():
             list_recipe = food_details.get("list_recipe")
             if(list_recipe is not None):
-                r = re.compile("\\b" + response.meta['food_item'] + "\\b")
+                r = re.compile("\\b" + response.meta['food_item'] + "\\b", re.IGNORECASE)
                 result = filter(r.search, list_recipe)
                 if (list(result)):
                     cnt+=1
@@ -61,15 +61,15 @@ class UsdaSpider(scrapy.Spider):
                             value = response.xpath('//nutrient[@name="'+proxi+'"]/@value').extract_first()
                             db.reference().child('usda_food_exchange_nutrients').child(response.meta['exchange_category']).child(response.meta['food_item']).child(proxi).update({
                                 'unit': unit,
-                                'value': value
+                                'value': float(value)
                             })
 
                     db.reference().child("foodex_usda").child(response.meta['exchange_category']).child(response.meta['food_item']).update({
-                        "kcal": usda_kcal,
-                        "value_grams": usda_value_grams,
+                        "kcal": float(usda_kcal),
+                        "value_grams": float(usda_value_grams),
                         "no_food_items": cnt
                     })
-                    
+
                     db.reference().child("food_each_category").child(response.meta['exchange_category']).child(response.meta['food_item']).child(food_key).update({
                         "list_recipe": list_recipe,
                         "photo_url": photo_url,

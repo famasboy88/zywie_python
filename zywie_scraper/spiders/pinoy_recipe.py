@@ -10,11 +10,6 @@ class PinoyRecipeSpider(scrapy.Spider):
     allowed_domains = ['panlasangpinoy.com']
     start_urls = ['http://panlasangpinoy.com/indexes/recipe-index/']
     ################################################################
-    DIR = os.path.dirname(__file__)
-    cred = credentials.Certificate(os.path.join(DIR, 'service.json'))
-    firebase_admin.initialize_app(cred, {
-        'databaseURL' : 'https://zywie-2b7c2.firebaseio.com'
-    })
     rootDB = db.reference()
 
     def parse(self, response):
@@ -47,7 +42,7 @@ class PinoyRecipeSpider(scrapy.Spider):
         description = response.css('div.entry-content > p::text').extract_first()
         photo_url = response.xpath('//img[@itemprop="image"]/@src').extract_first()
         prep_time =  response.xpath('//time[@itemprop="totalTime"]/text()').extract_first()
-        if(photo_url == None):
+        if(photo_url is None):
             photo_url = response.css('img.photo::attr(src)').extract_first()
         procedure = response.css('div.ERSInstructions > ol > li::text').extract()
         self.rootDB.child('food_title').child(response.meta['title_id']).update({
