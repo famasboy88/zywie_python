@@ -52,8 +52,23 @@ class UsdaSpider(scrapy.Spider):
                     if(photo_url is None):
                         photo_url = "http://images.media-allrecipes.com/global/recipes/nophoto/nopicture-910x511.png"
                     proximity = response.xpath('//nutrient[@group="Proximates"]/@name').extract()
+                    measurement = response.xpath('//nutrient[@name="Energy"]/measures/measure/@label').extract()
                     usda_kcal = response.xpath('//nutrient[@name="Energy"]/@value').extract_first()
                     usda_value_grams = response.xpath('//nutrient[@name="Energy"]/measures/measure/@qty').extract_first()
+                    if(measurement is not None):
+                        for measure in measurement:
+                            eqv = response.xpath('//nutrient[@name="Energy"]/measures/measure[@label="'+measure+'"]/@eqv').extract_first()
+                            qty = response.xpath('//nutrient[@name="Energy"]/measures/measure[@label="'+measure+'"]/@qty').extract_first()
+                            value = response.xpath('//nutrient[@name="Energy"]/measures/measure[@label="'+measure+'"]/@value').extract_first()
+
+                            eunit = response.xpath('//nutrient[@name="Energy"]/measures/measure[@label="'+measure+'"]/@eunit').extract_first()
+                            measure = measure.replace('/','_S')
+                            db.reference().child("usda_food_measurement").child(response.meta['food_item']).child(measure).update({
+                                'eqv': float(eqv),
+                                'qty': float(qty),
+                                'value': float(value),
+                                'eunit': eunit
+                            })
                     if(proximity is not None):
                         for proxi in proximity:
                             unit = response.xpath('//nutrient[@name="'+proxi+'"]/@unit').extract_first()
